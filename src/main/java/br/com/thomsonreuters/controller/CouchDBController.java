@@ -3,8 +3,13 @@ package br.com.thomsonreuters.controller;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jnosql.diana.api.Settings;
+import org.jnosql.diana.couchdb.document.CouchDBDocumentCollectionManager;
+import org.jnosql.diana.couchdb.document.CouchDBDocumentCollectionManagerFactory;
+import org.jnosql.diana.couchdb.document.CouchDBDocumentConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.thomsonreuters.model.Person;
+import br.com.thomsonreuters.repository.PersonRepository;
 
 @Controller
 @RequestMapping(value = "/api")
@@ -49,11 +55,22 @@ public class CouchDBController {
 		logger.info("============================================= " + clazz.toString());
 		ObjectMapper objectMapper = new ObjectMapper();	
 		Object jsonToJava = objectMapper.readValue(data, clazz  );
-		
-		
 		logger.info("============================================= " + jsonToJava.toString());
 		
+		CouchDBDocumentConfiguration config = new CouchDBDocumentConfiguration();
+		CouchDBDocumentCollectionManagerFactory managerFactory = config.get();
+		CouchDBDocumentCollectionManager manager = managerFactory.get("model");
+		
+		
+
+		
+		logger.info(""+manager.count());
+		
 		if (jsonToJava instanceof Person) {
+			
+			
+			
+			
 			
 		}
 		
