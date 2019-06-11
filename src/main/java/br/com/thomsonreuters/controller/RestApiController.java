@@ -1,21 +1,25 @@
 package br.com.thomsonreuters.controller;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.jnosql.diana.api.Value;
 import org.jnosql.diana.api.document.Document;
 import org.jnosql.diana.api.document.DocumentEntity;
-import org.jnosql.diana.api.document.DocumentPreparedStatement;
 import org.jnosql.diana.couchdb.document.CouchDBDocumentCollectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,6 +33,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.com.thomsonreuters.model.Hero;
 import br.com.thomsonreuters.model.Person;
 
 @RestController
@@ -37,176 +42,71 @@ public class RestApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 	private static final String template = "Hello, %s!";
+	private static String tabela = "";
 	private final AtomicLong counter = new AtomicLong();	
 
 	@Autowired
 	private CouchDBDocumentCollectionManager managerCouchDB;
-//	@Autowired
-//	private AnnotationConfigApplicationContext context;
-//	@Autowired
-//	private HeroRepository heroRepo;
-	
-	@RequestMapping(value = "/import/{type}", headers = "Content-Type=application/json", method = RequestMethod.POST)
-	public <T> String getAcesse(@PathVariable String type, @RequestBody String data)
-			throws ClassNotFoundException, JsonParseException, JsonMappingException, IOException {
-		
 
-//		System.out.println(context.getBeanDefinitionCount() );
-//		System.out.println(context.getBeanDefinitionNames() );
-//		
-//        for (String beanName : context.getBeanDefinitionNames()) {
-//            System.out.println(beanName);
-//        }
+	
+	@PostMapping(value = "/import/{tableDestino}", headers = "Content-Type=application/json")
+	public <T> String getAcesse(@PathVariable String tableDestino, @RequestBody String jsonData)
+			throws ClassNotFoundException, JsonParseException, JsonMappingException, IOException {
+
+		tableDestino = StringUtils.capitalize(tableDestino.toLowerCase());
+		RestApiController.tabela = tableDestino;
 		
-		
-		type = StringUtils.capitalize(type);
-		String classe = "br.com.thomsonreuters.model." + type;
+		String classe = "br.com.thomsonreuters.model." + tableDestino;
 		Class<?> clazz = Class.forName(classe);
-		
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType tipoClass = mapper.getTypeFactory().constructCollectionType(List.class, clazz);
-		List<T> jsonToJava = mapper.readValue(data, tipoClass);
+		List<T> jsonToJava = mapper.readValue(jsonData, tipoClass);
 		
 		System.out.println("Obj Factory: " );
 		jsonToJava.stream().forEach(System.out::println);
-		System.out.println();
+		System.out.println("______________________________________________");
 		
-		DocumentEntity documentEntity = DocumentEntity.of(type);
-		documentEntity.add(Document.of("_id", type + "_" + UUID.randomUUID().toString()));
-		documentEntity.add(Document.of( type, jsonToJava.toString() ));
+		DocumentEntity documentEntity = DocumentEntity.of(tableDestino);
+		documentEntity.add(Document.of("_id", tableDestino + "_" + UUID.randomUUID().toString()));
+		documentEntity.add(Document.of( tableDestino, jsonData ));
 		managerCouchDB.insert(documentEntity);
 		
 		
-		DocumentPreparedStatement prepare = managerCouchDB.prepare("select * from Hero");
-		List<DocumentEntity> heros = prepare.getResultList();
+		/*
+		 * Retornando query e transformando em Java
+		 */
 		
-		for (DocumentEntity hr : heros) {
+		List<DocumentEntity> query = managerCouchDB.query("select * from " + tableDestino);
+		
+		List<T> jsonToJava2 = null;
+		StringBuilder saida = new StringBuilder();
+		
+		for (DocumentEntity hr : query) {
 
 			List<Document> hs = hr.getDocuments().stream()
-					.filter(s->s.getName().contains("Hero"))
+					.filter(s->s.getName().contains(RestApiController.tabela))
 					.collect(Collectors.toList());
 
-			System.out.println(" ======= 1");
-			hs.forEach(System.out::println);
-			System.out.println(" ======= 2");
-			System.out.println(hs.toString());
-			System.out.println(" ======= 3");
+			Object docValue = hs.get(0).getValue().get();
+			System.out.println(docValue);
 			
-			List <T> jsonToJava2 = mapper.readValue(  hs.toString(), tipoClass);
-			System.out.println(" ======= 4");
-			jsonToJava2.stream().forEach(System.out::println);
-			System.out.println(" ======= 5");
+			jsonToJava2 = mapper.readValue( docValue.toString(), tipoClass);
 			
+			Iterator<T> it = jsonToJava2.iterator();
+			while ( it.hasNext() ) {
+				Hero next = (Hero) it.next();
+				saida.append("Id -> " +next.getId() + System.lineSeparator());
+				saida.append("Name -> " +next.getName() + System.lineSeparator());
+				saida.append("Real Name -> " +next.getRealName() + System.lineSeparator());
+				saida.append("Age -> " +next.getAge() + System.lineSeparator() + System.lineSeparator());
+				
+				System.out.println( saida );
+			}
+						
 		}		
 
-		
-//		
-//		System.out.println( "------------------------------------------------" );
-//		heros.forEach(System.out::println);
-//		System.out.println( "------------------------------------------------" );
-//		
-//		JavaType tipoClass2 = mapper.getTypeFactory().constructCollectionType(List.class, clazz);
-//		
-//		
-//		
-//		
-//		List<T> jsonToJava2 = mapper.readValue(heros.toString(), tipoClass2);
-//		System.out.println(jsonToJava2);
-		
-		
-//		DocumentTemplate template = context.select(DocumentTemplate.class).get();
-//		template.insert(ironMan);
-		
-		
-		
-		
-//	    ClienteServico servico = context.getBean(ClienteServico.class);
-//	    servico.salvar(new Cliente(1, "Aluno João da Silva"));
-	    
-//	    Hero heroi = context.getBean(Hero.class);
-//	    servico.salvar(new Cliente(1, "Aluno João da Silva"));
-		
-		
-		
-//        Hero ironMan = Hero.builder()
-//				.withRealName("Tony Stark").withName("iron_man").withAge(34)
-//				.build();
-//        
-//        
-//        System.out.println("Objeto: " + ironMan);
 
-
-//		  Hero ironMan = Hero.builder().withRealName("Tony Stark").withName("iron_man")
-//                .withAge(34).build();
-//		  
-//		  SeContainer container = SeContainerInitializer.newInstance().initialize();
-//		  DocumentTemplate template = container.select(DocumentTemplate.class).get();
-//		  template.insert(ironMan);
-//		  
-//        Hero ironMan = Hero.builder().withRealName("Tony Stark").withName("iron_man")
-//                .withAge(34).withPowers(Collections.singleton("rich")).build();
-//        DocumentTemplate template = container.select(DocumentTemplate.class).get();
-//
-//        template.insert(ironMan);
-//
-//        DocumentQuery query = select().from("Hero").where(eq(Document.of("_id", "iron_man"))).build();
-//        List<Hero> heroes = template.select(query);
-//        System.out.println(heroes);
-
-		
-		
-		
-		
-//		DocumentQuery documentQuery = new CouchDBDocumentQuery(documentQuery );
-		
-		
-//		List<DocumentEntity> query = managerCouchDB.query("select * from " + type);
-//		
-//		System.out.println("============================");
-//		System.out.println("aqui com Factory......" + jsonToJava);//
-//
-//		for (DocumentEntity hr : query) {
-//
-//			List<Document> hs = hr.getDocuments().stream()
-//					.filter(s->s.getName().contains("Hero"))
-//					.collect(Collectors.toList());
-//
-//			hs.forEach(System.out::println);
-//
-//			System.out.println(hs.parallelStream().findFirst());
-			
-//			List <T> jsonToJava2 = mapper.readValue(  hs, tipoClass);
-//			jsonToJava2.stream().forEach(System.out::println);			
-//			
-//		}
-
-//		for (Hero hero : jsonToJava) {
-//			System.out.println(hero.toString());
-//		}
-
-		System.out.println("============================");
-
-//		DocumentQuery entity  ;
-//		CouchDBDocumentQuery quey = CouchDBDocumentQuery.of(null, "books");
-//		List<DocumentEntity> documentsFound = collectionManager.find(query);
-
-//        DocumentQuery query = DocumentQuery.of(COLLECTION_NAME);
-//        query.and(DocumentCondition.eq(id.get()));
-//        List<DocumentEntity> documentsFound = collectionManager.find(query);
-
-//		entityManager = managerFactory.get("people");
-//		Object id = entity.find(ID).map(Document::get).get();
-//        DocumentQuery query = select().from(COLLECTION_NAME).where(ID).eq(id).build();
-//        DocumentEntity documentFound = entityManager.singleResult(query).get();
-//        
-//		MangoQueryConverter converter = new MangoQueryConverter();
-
-//		DocumentQuery query = select().from("books").where("_id").eq(100).build();
-//		List<DocumentEntity> entities = manager.select(query)
-
-//		log.info("============================="+managerFactory);
-
-		return "oi";// heroRepository..findAll();
+		return saida.toString() ;
 	}
 
 	

@@ -76,14 +76,15 @@ public class Hero implements Serializable {
         return Objects.hashCode(name);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Hero{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(",name='").append(name).append('\'');
-        sb.append(", realName='").append(realName).append('\'');
-        sb.append(", age=").append(age);
-//        sb.append(", powers=").append(powers);
-        sb.append('}');
-        return sb.toString();
-    }}
+//    @Override
+//    public String toString() {
+//        final StringBuilder sb = new StringBuilder("Hero{");
+//        sb.append("id='").append(id).append('\'');
+//        sb.append(",name='").append(name).append('\'');
+//        sb.append(", realName='").append(realName).append('\'');
+//        sb.append(", age=").append(age);
+////        sb.append(", powers=").append(powers);
+//        sb.append('}');
+//        return sb.toString();
+//    }
+}
