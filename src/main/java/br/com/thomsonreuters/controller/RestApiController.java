@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.jnosql.artemis.DatabaseQualifier;
 import org.jnosql.diana.api.document.Document;
 import org.jnosql.diana.api.document.DocumentEntity;
 import org.jnosql.diana.couchdb.document.CouchDBDocumentCollectionManager;
@@ -35,7 +36,7 @@ public class RestApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 	private static final String template = "Hello, %s!";
-	private static final String packageModel = "br.com.thomsonreuters.model.";
+	private static final String PACKAGE_MODEL = "br.com.thomsonreuters.model.";
 	private static String tabela = "";
 	private final AtomicLong counter = new AtomicLong();	
 
@@ -50,7 +51,7 @@ public class RestApiController {
 		 */
 		tableDestination = StringUtils.capitalize(tableDestination.toLowerCase()).trim();
 		RestApiController.tabela = tableDestination;
-		String classe = packageModel + tableDestination;
+		String classe = PACKAGE_MODEL + tableDestination;
 
 		Class<?> clazz = Class.forName(classe);
 		ObjectMapper mapper = new ObjectMapper();
@@ -113,6 +114,19 @@ public class RestApiController {
 	
 	@GetMapping(value = "/hello")
 	public String helloWorld() {
+		System.out.println(DatabaseQualifier.ofDocument() );
+		System.out.println(DatabaseQualifier.ofDocument().provider() );
+		System.out.println(DatabaseQualifier.ofDocument().value());
+		System.out.println("-------------------------------------------------------");
+		
+		System.out.println( managerCouchDB.getClass().getModifiers() );
+		System.out.println( managerCouchDB.getClass().getName() );
+		System.out.println( managerCouchDB.getClass().getSimpleName() );
+		System.out.println( managerCouchDB.getClass().getTypeName() );
+		
+		
+		
+		
 		return "Hello !";
 	}
 }

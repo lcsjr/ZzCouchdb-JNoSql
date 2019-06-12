@@ -11,10 +11,10 @@ public class ConfigBeans {
 	
 	@Bean
 	public CouchDBDocumentCollectionManager managerCouchDB() {
-		CouchDBDocumentConfiguration config = new CouchDBDocumentConfiguration();
+		CouchDBDocumentConfiguration config = new CouchDBDocumentConfiguration();		
 		CouchDBDocumentCollectionManagerFactory managerFactory = config.get();
 		CouchDBDocumentCollectionManager managerCouchDB = managerFactory.get("my-db");
-
+		
 		return managerCouchDB;
 	}
 
