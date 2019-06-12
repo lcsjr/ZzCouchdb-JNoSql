@@ -1,10 +1,10 @@
-package br.com.thomsonreuters;
+package br.com.thomsonreuters.main;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
-@SpringBootApplication // (scanBasePackages={"com.couchdb.*.*"})
+@SpringBootApplication  (scanBasePackages={"br.com.thomsonreuters"})
 //@EnableJpaRepositories("com.couchdb.model.DAO.repository.*.*")
 //@EntityScan//("com.couchdb.model.*.*")
 public class CouchDbJNoSqlApplication {

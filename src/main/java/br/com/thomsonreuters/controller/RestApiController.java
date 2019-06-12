@@ -51,18 +51,17 @@ public class RestApiController {
 		tableDestination = StringUtils.capitalize(tableDestination.toLowerCase()).trim();
 		RestApiController.tabela = tableDestination;
 		String classe = packageModel + tableDestination;
+
 		Class<?> clazz = Class.forName(classe);
-		
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType tipoClass = mapper.getTypeFactory().constructCollectionType(List.class, clazz);
 		
 		List<T> jsonToJava = null;
 		StringBuilder saida = new StringBuilder();
 		String queryExec = "select * from " + tableDestination;
-		System.out.println( queryExec);
-		System.out.println( managerCouchDB.count() );
+
 		List<DocumentEntity> query = managerCouchDB.query(queryExec );
-		System.out.println(query);
+		
 		for (DocumentEntity hr : query) {
 
 			List<Document> hs = hr.getDocuments().stream()
@@ -70,7 +69,7 @@ public class RestApiController {
 					.collect(Collectors.toList());
 
 			Object docValue = hs.get(0).getValue().get();
-			System.out.println(docValue);
+			logger.info("Tabela["+RestApiController.tabela+"]: "+ docValue);
 			
 			jsonToJava = mapper.readValue( docValue.toString(), tipoClass);
 			
@@ -100,10 +99,11 @@ public class RestApiController {
 		documentEntity.add(Document.of( tableDestination, jsonData ));
 		DocumentEntity result = managerCouchDB.insert(documentEntity);
 		Object numProtocol = result.find("_id").get().getValue().get();
-		System.out.println( managerCouchDB.count() );
-		StringBuilder saida = new StringBuilder();
-		saida.append("Protocolo de importacao: "+numProtocol );
-		return saida.toString();
+		
+		String saida = "Protocolo de importacao: "+numProtocol ;
+		logger.info(saida);
+
+		return saida;
 	}
 	
 	@GetMapping(value = "/person")
