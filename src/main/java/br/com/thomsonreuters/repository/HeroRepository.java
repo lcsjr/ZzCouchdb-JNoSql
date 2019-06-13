@@ -3,11 +3,13 @@ package br.com.thomsonreuters.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.jnosql.artemis.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import br.com.thomsonreuters.model.Hero;
 
-public interface HeroRepository extends Repository<Hero, String> {
+@Repository
+public interface HeroRepository extends JpaRepository<Hero, String> {
 
     Optional<Hero> findByName(String name);
 

@@ -3,11 +3,12 @@ package br.com.thomsonreuters.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-import org.jnosql.artemis.Column;
-import org.jnosql.artemis.Entity;
-import org.jnosql.artemis.Id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -23,16 +24,15 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity("Hero")
+@Entity
+@Table(name="Hero")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EntityListeners(AuditingEntityListener.class)
 public class Hero implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Autowired
-	public static HeroRepository repository;
-
+	
     @Id
     private String id;
 	
