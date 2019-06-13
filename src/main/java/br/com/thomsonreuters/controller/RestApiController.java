@@ -7,6 +7,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
 import org.jnosql.artemis.DatabaseQualifier;
 import org.jnosql.diana.api.document.Document;
 import org.jnosql.diana.api.document.DocumentEntity;
@@ -27,12 +31,11 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.com.thomsonreuters.model.Hero;
 import br.com.thomsonreuters.model.Person;
-import br.com.thomsonreuters.repository.HeroRepository;
 
 @RestController
 @RequestMapping("/api")
+@Transactional
 public class RestApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
@@ -44,8 +47,12 @@ public class RestApiController {
 	@Autowired
 	private CouchDBDocumentCollectionManager managerCouchDB;
 	
-	@Autowired
-	private HeroRepository repository;
+	@PersistenceContext
+	private EntityManager entityManager;
+	
+	public <T> void salvar(T next){
+		entityManager.persist(next);
+	}
 
 	@GetMapping(value = "/export")
 	public <T> String getData(@RequestParam(value="tabela") String tableDestination) 
@@ -78,22 +85,14 @@ public class RestApiController {
 			
 			jsonToJava = mapper.readValue( docValue.toString(), tipoClass);
 			
-			
 			Iterator<T> it = jsonToJava.iterator();
 			while ( it.hasNext() ) {
-				Hero next = (Hero) it.next();
-				
-				repository.save(next);
-				
-				saida.append("Id -> " +next.getId() + ";");
-				saida.append("Name -> " +next.getName() + ";");
-				saida.append("Real Name -> " +next.getRealName() + ";");
-				saida.append("Age -> " +next.getAge() +";" + System.lineSeparator());
-				
-				System.out.println( saida );
+				T next = it.next();
+				salvar(next);
+				saida.append( next + System.lineSeparator());
 			}
-						
-		}		
+		}
+		
 		return saida.toString() ;
 	}
 	

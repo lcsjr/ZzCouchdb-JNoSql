@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan("br.com.thomsonreuters.model")
 @EnableJpaRepositories("br.com.thomsonreuters.repository")
 public class ConfigBeans {
-	
+
 	@Bean
 	public CouchDBDocumentCollectionManager managerCouchDB() {
 		CouchDBDocumentConfiguration config = new CouchDBDocumentConfiguration();		
@@ -21,14 +21,5 @@ public class ConfigBeans {
 		
 		return managerCouchDB;
 	}
-
-//	@Bean
-//	public AnnotationConfigApplicationContext context() {
-//		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-//		context.scan(CouchDbJNoSqlApplication.class.getPackage().getName());
-//		context.register(ConfigBeans.class);
-//		context.refresh();
-//		return context;
-//	}
-
+	
 }
