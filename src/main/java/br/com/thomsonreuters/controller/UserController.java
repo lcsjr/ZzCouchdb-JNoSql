@@ -7,15 +7,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.thomsonreuters.model.Usuario;
-import br.com.thomsonreuters.model.repository.UsuarioRepositorio;
+import br.com.thomsonreuters.model.ApplicationUser;
+import br.com.thomsonreuters.model.repository.ApplicationUserRepository;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
 	@Autowired
-	private UsuarioRepositorio userRepositorio;
+	private ApplicationUserRepository userRepositorio;
 
 	@Autowired
 	private BCryptPasswordEncoder bCrypt;
@@ -29,7 +29,7 @@ public class UserController {
 	 * A implementação deste endpoint é somente para criptografar a senha do usuario
 	 */
 	@PostMapping("/sign-up")
-	public void signUp( @RequestBody Usuario user) {
+	public void signUp( @RequestBody ApplicationUser user) {
 		user.setPassword( bCrypt.encode(user.getPassword() ));
 		userRepositorio.save(user);
 	}

@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EntityScan("br.com.thomsonreuters.model")
-@EnableJpaRepositories("br.com.thomsonreuters.repository")
+@EnableJpaRepositories("br.com.thomsonreuters.model.repository")
 public class ConfigBeans {
 
 	@Bean
