@@ -34,8 +34,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.thomsonreuters.model.Person;
 
 @RestController
-@RequestMapping("/api")
 @Transactional
+@RequestMapping("/api")
 public class RestApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
@@ -50,7 +50,7 @@ public class RestApiController {
 	@PersistenceContext
 	private EntityManager entityManager;
 	
-	public <T> void salvar(T next){
+	<T> void salvar(T next){
 		entityManager.persist(next);
 	}
 
@@ -121,19 +121,6 @@ public class RestApiController {
 	
 	@GetMapping(value = "/hello")
 	public String helloWorld() {
-		System.out.println(DatabaseQualifier.ofDocument() );
-		System.out.println(DatabaseQualifier.ofDocument().provider() );
-		System.out.println(DatabaseQualifier.ofDocument().value());
-		System.out.println("-------------------------------------------------------");
-		
-		System.out.println( managerCouchDB.getClass().getModifiers() );
-		System.out.println( managerCouchDB.getClass().getName() );
-		System.out.println( managerCouchDB.getClass().getSimpleName() );
-		System.out.println( managerCouchDB.getClass().getTypeName() );
-		
-		
-		
-		
 		return "Hello !";
 	}
 }

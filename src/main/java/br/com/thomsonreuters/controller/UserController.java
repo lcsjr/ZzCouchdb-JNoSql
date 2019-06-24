@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.thomsonreuters.model.ApplicationUser;
@@ -20,18 +21,16 @@ public class UserController {
 	@Autowired
 	private BCryptPasswordEncoder bCrypt;
 
-//	public UserController(UsuarioRepositorio applicationUserRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
-//		this.userRepositorio = applicationUserRepository;
-//		this.bCrypt = bCryptPasswordEncoder;
-//	}
-	
 	/*
 	 * A implementação deste endpoint é somente para criptografar a senha do usuario
 	 */
 	@PostMapping("/sign-up")
-	public void signUp( @RequestBody ApplicationUser user) {
+	@ResponseBody
+	public String signUp( @RequestBody ApplicationUser user) {
 		user.setPassword( bCrypt.encode(user.getPassword() ));
 		userRepositorio.save(user);
+		
+		return user.toString();
 	}
 
 }

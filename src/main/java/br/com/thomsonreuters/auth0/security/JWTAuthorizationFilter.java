@@ -14,10 +14,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
@@ -32,37 +35,50 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 		String header = request.getHeader(HEADER_STRING);
 		
 		if (header == null || !header.startsWith(TOKEN_PREFIX) ) {
-		
 			chain.doFilter(request, response);
 			return;
 		}
 
-		UsernamePasswordAuthenticationToken authentication = getAuthenticatio(request);
+		UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 		
-		
-		
-		super.doFilterInternal(request, response, chain);
+		chain.doFilter(request, response);
 	}
 
-	private UsernamePasswordAuthenticationToken getAuthenticatio(HttpServletRequest request) {
+	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
 
-		String token =request.getHeader(HEADER_STRING);
-		System.out.println("token: " + token);
+		String token =request.getHeader(HEADER_STRING).replace(TOKEN_PREFIX, "").trim();
 		
 		if (token != null) {
 			//parse the token
-			String user = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
+			DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(SECRET))
 					.build()
-					.verify(token.replace(TOKEN_PREFIX, ""))
-					.getSubject();
-			System.out.println("user: "+user);
+					.verify(token);
+			
+			String user = decodedJWT.getSubject();
+			System.out.println("user: "+user);			
+			
+			if ( decodedJWT.getClaims().containsKey("company") )
+				System.out.println( "company : " + decodedJWT.getClaims().get("company").asString()  );
+			
+			if ( decodedJWT.getClaims().containsKey("userName"))
+				System.out.println( "Nome : " + decodedJWT.getClaims().get("userName").asString()  );
+			
+			if ( !decodedJWT.getHeaderClaim("owner").asString().isEmpty() )
+				System.out.println( "owner: " + decodedJWT.getHeaderClaim("owner").asString() );
+			
+			System.out.println( "Header:   " +decodedJWT.getHeader() );
+			System.out.println( "Subject:  " +user );
+			System.out.println( "Audience: " +decodedJWT.getAudience() );
+			System.out.println( "IssuedAt: " +decodedJWT.getIssuedAt() );
+			System.out.println( "Expires:  " +decodedJWT.getExpiresAt() );
+			System.out.println( "Issuer:   " +decodedJWT.getIssuer() );
 			
 			if (user != null) {
 				return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
 			}
 			return null;
 		}
-		
 		return null;
 	}
 

@@ -1,9 +1,7 @@
 package br.com.thomsonreuters.model;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,12 +28,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 			throw new UsernameNotFoundException(username);
 		}
 		
-		return new User(user.getUsername(), user.getPassword(), emptyList())	;
+		return new User(user.getUsername(), user.getPassword(), new ArrayList<>() )	;
 	}
 
-	private Collection<? extends GrantedAuthority> emptyList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
