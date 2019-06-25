@@ -1,5 +1,7 @@
 package br.com.thomsonreuters.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -22,8 +24,10 @@ import lombok.NoArgsConstructor;
 @Table(name="Person")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EntityListeners(AuditingEntityListener.class)
-public class Person {
+public class Person implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private long id;

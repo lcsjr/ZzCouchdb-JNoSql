@@ -6,7 +6,6 @@ import static br.com.thomsonreuters.auth0.security.SecurityConstants.SECRET;
 import static br.com.thomsonreuters.auth0.security.SecurityConstants.TOKEN_PREFIX;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

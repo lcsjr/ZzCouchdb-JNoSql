@@ -1,1 +1,1 @@
-INSERT INTO USUARIO (username, password) VALUES ('LUIZ','$2a$10$CJeGUiW4h4dl3mK3OpImFu.EjSh3fBPoAiO98rLjfIud7FmrDaAFC');
+INSERT INTO USUARIO (username, password) VALUES ('Admin','$2a$10$CP7gxOQGBKnHAkj6XTse9u2yjB5P5CnauAiUqlMP6rVDpV.X1qDxC');
