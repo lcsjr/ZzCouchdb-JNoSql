@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import javax.transaction.Transactional;
 
 import org.jnosql.diana.api.document.Document;
 import org.jnosql.diana.api.document.DocumentEntity;
+import org.jnosql.diana.api.document.DocumentQuery;
 import org.jnosql.diana.couchdb.document.CouchDBDocumentCollectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import br.com.thomsonreuters.model.Person;
 
+import static org.jnosql.diana.api.document.query.DocumentQueryBuilder.select;
+
 @RestController
 @Transactional
 @RequestMapping("/api")
@@ -50,6 +54,7 @@ public class RestApiController {
 	private final AtomicLong counter = new AtomicLong();	
 	private static String database = "";
 	private static String hostCouchdb = "http://127.0.0.1:5984/";
+	private boolean queryNewModel = true;
 
 	@Autowired
 	private CouchDBDocumentCollectionManager managerCouchDB;
@@ -81,13 +86,29 @@ public class RestApiController {
 		
 		List<T> jsonToJava = null;
 		StringBuilder saida = new StringBuilder();
-		String queryExec = "select * from " + tableDestination;
-
-		List<DocumentEntity> listDocs = managerCouchDB.query(queryExec );
+		
+		List<DocumentEntity> listDocs;
+		
+		if ( queryNewModel ) {
+			DocumentQuery queryExec = select().from( tableDestination).build(); //.where("_id").eq("iron_man").build();
+	        listDocs = managerCouchDB.select(queryExec );
+		} else {
+			String queryExec = "select * from " + tableDestination;
+			listDocs = managerCouchDB.query(queryExec );
+		}
 				
 		for (DocumentEntity doc : listDocs) {
 
+			
+			Document docRev1 = doc.getDocuments().stream().filter(s->s.getName().contains("_rev")).findFirst().get();
+			System.out.println( "===================================");
+			System.out.println( docRev1.getName() );
+			System.out.println( docRev1.getValue() );
+			System.out.println( "===================================");
+			
+			
 			List<Document> docRev = doc.getDocuments().stream().filter(s->s.getName().contains("_rev")).collect(Collectors.toList());
+
 			Object docRevName = docRev.get(0).getName() ;  
 			Object docRevValue = docRev.get(0).getValue().get();
 
