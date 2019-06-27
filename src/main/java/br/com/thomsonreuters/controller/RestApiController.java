@@ -100,25 +100,17 @@ public class RestApiController {
 		for (DocumentEntity doc : listDocs) {
 
 			
-			Document docRev1 = doc.getDocuments().stream().filter(s->s.getName().contains("_rev")).findFirst().get();
-			System.out.println( "===================================");
-			System.out.println( docRev1.getName() );
-			System.out.println( docRev1.getValue() );
-			System.out.println( "===================================");
+			Document docRev = doc.getDocuments().stream().filter(s->s.getName().contains("_rev")).findFirst().get();
+			String docRevName = docRev.getName() ;
+			Object docRevValue = docRev.getValue().get() ;			
 			
+			Document docId = doc.getDocuments().stream().filter(s->s.getName().contains("_id")).findFirst().get();
+			String docIdName = docId.getName() ;  
+			Object docIdValue = docId.getValue().get();	
 			
-			List<Document> docRev = doc.getDocuments().stream().filter(s->s.getName().contains("_rev")).collect(Collectors.toList());
-
-			Object docRevName = docRev.get(0).getName() ;  
-			Object docRevValue = docRev.get(0).getValue().get();
-
-			List<Document> docId = doc.getDocuments().stream().filter(s->s.getName().contains("_id")).collect(Collectors.toList());
-			Object docIdName = docId.get(0).getName() ;  
-			Object docIdValue = docId.get(0).getValue().get();			
-			
-			List<Document> docEntity = doc.getDocuments().stream().filter(s->s.getName().contains(RestApiController.tabela)).collect(Collectors.toList());
-			Object docName = docEntity.get(0).getName();
-			Object docValue = docEntity.get(0).getValue().get();
+			Document docEntity = doc.getDocuments().stream().filter(s->s.getName().contains(tabela)).findFirst().get();
+			String docName = docEntity.getName();
+			Object docValue = docEntity.getValue().get();			
 
 			logger.info("Tabela["+docName+"]: "+ docIdName +": " +docIdValue);
 			logger.info("Tabela["+docName+"]: "+ docRevName +": " +docRevValue);
@@ -131,7 +123,7 @@ public class RestApiController {
 				salvar(next);
 				saida.append( next + System.lineSeparator());
 			}
-			saida.append ( "Code: " + removeDoc(docIdValue.toString(), docRevValue.toString()) );
+			saida.append ( "Code: " + removeDoc(docIdValue.toString(), docRevValue.toString()) + System.lineSeparator());
 		}
 		
 		return saida.toString() ;
@@ -149,10 +141,10 @@ public class RestApiController {
 			con.setRequestProperty("Accept", "application/json");
 			con.setDoOutput(true);
 
-	        OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream());
-	        osw.write("");
-	        osw.flush();
-	        osw.close();
+//	        OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream());
+//	        osw.write("");
+//	        osw.flush();
+//	        osw.close();
 	        	        
 	        System.err.println(con.getResponseCode() + " - " + con.getResponseMessage());
 			
